@@ -128,7 +128,7 @@ def main(args):
     with open(os.path.join(data_folder, "dataset.pk"), "rb") as f:
         dataset = pk.load(f)
         class_names = dataset["class_names"]
-
+    
     static_repr_path = os.path.join(data_folder, f"static_repr_lm-{args.lm_type}-{args.layer}.pk")
     with open(static_repr_path, "rb") as f:
         vocab = pk.load(f)
@@ -142,13 +142,25 @@ def main(args):
     print("Finish reading data")
 
     print(class_names)
+    
+    # open .pk file that contains the new class word representation
+    with open("./class_representations/class_representation_NYT-Small.pk", "rb") as f:
+        new_representations = pk.load(f)
 
+    print("representations: ", new_representations) 
     finished_class = set()
     masked_words = set(class_names)
     cls_repr = [None for _ in range(len(class_names))]
     class_words = [[class_names[cls]] for cls in range(len(class_names))]
-    class_words_representations = [[static_word_representations[word_to_index[class_names[cls]]]]
-                                   for cls in range(len(class_names))]
+    class_words_representations = [[new_representations[cls]] for cls in class_names]
+    
+    #class_words_representations = [[static_word_representations[word_to_index[class_names[cls]]]]
+    #                               for cls in range(len(class_names))]
+    
+    # update the static representation in the vocab dictionary
+    for cls in range(len(class_names)):
+        vocab["static_word_representations"][word_to_index[class_names[cls]]] = class_words_representations[cls][0]
+    
     for t in range(1, args.T):
         class_representations = [average_with_harmonic_series(class_words_representation)
                                  for class_words_representation in class_words_representations]
