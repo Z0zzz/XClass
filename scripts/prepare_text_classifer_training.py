@@ -33,12 +33,12 @@ def write_to_dir(text, labels, dataset_name, suffix_name):
              os.path.join(DATA_FOLDER_PATH, new_dataset_name, "classes.txt"))
 
 
-def main(dataset_name, suffix, confidence_threshold):
+def main(args,dataset_name, suffix, confidence_threshold):
     data_dir = os.path.join(INTERMEDIATE_DATA_FOLDER_PATH, dataset_name)
 
     cleaned_text = load_clean_text(os.path.join(DATA_FOLDER_PATH, dataset_name))
 
-    with open(os.path.join(data_dir, f"data.{suffix}.pk"), "rb") as f:
+    with open(os.path.join(data_dir, f"data.{suffix}-masked-{args.mask}.pk"), "rb") as f:
         save_data = pickle.load(f)
         documents_to_class = save_data["documents_to_class"]
         distance = save_data["distance"]
@@ -65,7 +65,7 @@ def main(dataset_name, suffix, confidence_threshold):
     gold_classes = [gold_labels[i] for i in selected]
     evaluate_predictions(gold_classes, classes)
     ###
-    write_to_dir(text, classes, dataset_name, f"{suffix}.{confidence_threshold}")
+    write_to_dir(text, classes, dataset_name, f"{suffix}.{confidence_threshold}-masked-{args.mask}")
     # json.dump(selected, open("m_sel.json", "w"))
     # json.dump(documents_to_class.tolist(), open("m_pre.json", "w"))
 
@@ -74,6 +74,7 @@ if __name__ == '__main__':
     parser.add_argument("--dataset_name", default="agnews")
     parser.add_argument("--suffix", type=str, default="pca64.clusgmm.bbu-12.mixture-100.42")
     parser.add_argument("--confidence_threshold", default=0.5)
+    parser.add_argument("--mask", type=int, default=31 )
     args = parser.parse_args()
     print(vars(args))
-    main(args.dataset_name, args.suffix, args.confidence_threshold)
+    main(args,args.dataset_name, args.suffix, args.confidence_threshold)

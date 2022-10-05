@@ -23,7 +23,7 @@ MODELS = {
 DATA_FOLDER_PATH = os.path.join('/', 'data', 'mengke', '.cache')
 INTERMEDIATE_DATA_FOLDER_PATH = os.path.join('/', 'data', 'mengke', '.cache', 'intermediate_data')
 # this is also defined in run_train_text_classifier.sh, make sure to change both when changing.
-FINETUNE_MODEL_PATH = os.path.join('..', 'models')
+FINETUNE_MODEL_PATH = os.path.join('/', 'data', 'models')
 
 
 def tensor_to_numpy(tensor):

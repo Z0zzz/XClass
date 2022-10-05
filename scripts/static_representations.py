@@ -160,12 +160,12 @@ def main(args):
     static_word_representations = list(word_avg.values())
     vocab_occurrence = list(word_count.values()) 
 
-    with open(os.path.join(data_folder, f"tokenization_lm-{args.lm_type}-{args.layer}.pk"), "wb") as f:
+    with open(os.path.join(data_folder, f"tokenization_lm-{args.lm_type}-{args.layer}-masked-{args.mask}.pk"), "wb") as f:
         pk.dump({
             "tokenization_info": tokenization_info,
         }, f, protocol=4)
 
-    with open(os.path.join(data_folder, f"static_repr_lm-{args.lm_type}-{args.layer}.pk"), "wb") as f:
+    with open(os.path.join(data_folder, f"static_repr_lm-{args.lm_type}-{args.layer}-masked-{args.mask}.pk"), "wb") as f:
         pk.dump({
             "static_word_representations": static_word_representations,
             "vocab_words": vocab_words,
@@ -182,6 +182,7 @@ if __name__ == '__main__':
     parser.add_argument("--vocab_min_occurrence", type=int, default=5)
     # last layer of BERT
     parser.add_argument("--layer", type=int, default=12)
+    parser.add_argument("--mask", type=int, default=31)
     args = parser.parse_args()
     print(vars(args))
     main(args)

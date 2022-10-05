@@ -129,14 +129,14 @@ def main(args):
         dataset = pk.load(f)
         class_names = dataset["class_names"]
     
-    static_repr_path = os.path.join(data_folder, f"static_repr_lm-{args.lm_type}-{args.layer}.pk")
+    static_repr_path = os.path.join(data_folder, f"static_repr_lm-{args.lm_type}-{args.layer}-masked-{args.mask}.pk")
     with open(static_repr_path, "rb") as f:
         vocab = pk.load(f)
         static_word_representations = vocab["static_word_representations"]
         word_to_index = vocab["word_to_index"]
         vocab_words = vocab["vocab_words"]
 
-    with open(os.path.join(data_folder, f"tokenization_lm-{args.lm_type}-{args.layer}.pk"), "rb") as f:
+    with open(os.path.join(data_folder, f"tokenization_lm-{args.lm_type}-{args.layer}-masked-{args.mask}.pk"), "rb") as f:
         tokenization_info = pk.load(f)["tokenization_info"]
 
     print("Finish reading data")
@@ -144,19 +144,28 @@ def main(args):
     print(class_names)
     
     # open .pk file that contains the new class word representation
-    with open("./class_representations/class_representation_NYT-Small.pk", "rb") as f:
+    with open(f"./class_representations/class_representation_{args.dataset_name}.pk", "rb") as f:
         new_representations = pk.load(f)
-
-    print("representations: ", new_representations) 
+    
     finished_class = set()
     masked_words = set(class_names)
     cls_repr = [None for _ in range(len(class_names))]
     class_words = [[class_names[cls]] for cls in range(len(class_names))]
+    class_words_representations = []
+
+    # replace class(es) that is to be masked out with the the old representation from XClass
+    for cls in range(len(class_names)):
+        if args.mask & (1 << cls):
+            class_words_representations.append([new_representations[class_names[cls]]])
+        else:
+            class_words_representations.append([static_word_representations[word_to_index[class_names[cls]]]])
+            print("Masking out %s..." %class_names[cls])
+    '''
+    class_words_representations = [[static_word_representations[word_to_index[class_names[cls]]]]
+                                   for cls in range(len(class_names))]
     class_words_representations = [[new_representations[cls]] for cls in class_names]
-    
-    #class_words_representations = [[static_word_representations[word_to_index[class_names[cls]]]]
-    #                               for cls in range(len(class_names))]
-    
+    '''
+
     # update the static representation in the vocab dictionary
     for cls in range(len(class_names)):
         vocab["static_word_representations"][word_to_index[class_names[cls]]] = class_words_representations[cls][0]
@@ -226,7 +235,7 @@ def main(args):
     document_representations = np.array(document_representations)
     print("Finish getting document representations")
     with open(os.path.join(data_folder,
-                           f"document_repr_lm-{args.lm_type}-{args.layer}-{args.attention_mechanism}-{args.T}.pk"),
+                           f"document_repr_lm-{args.lm_type}-{args.layer}-{args.attention_mechanism}-{args.T}-masked-{args.mask}.pk"),
               "wb") as f:
         pk.dump({
             "class_words": class_words,
@@ -243,7 +252,7 @@ if __name__ == '__main__':
     parser.add_argument("--layer", type=int, default=12)
     parser.add_argument("--T", type=int, default=100)
     parser.add_argument("--attention_mechanism", type=str, default="mixture")
-
+    parser.add_argument("--mask", type=int, default=31)
     args = parser.parse_args()
     print(vars(args))
     main(args)

@@ -21,7 +21,7 @@ from utils import (INTERMEDIATE_DATA_FOLDER_PATH, cosine_similarity_embedding,
                    most_common, pairwise_distances)
 
 
-def main(dataset_name,
+def main(args,dataset_name,
          pca,
          cluster_method,
          lm_type,
@@ -39,7 +39,7 @@ def main(dataset_name,
     save_dict_data["document_repr_type"] = document_repr_type
     save_dict_data["random_state"] = random_state
 
-    naming_suffix = f"pca{pca}.clus{cluster_method}.{lm_type}.{document_repr_type}.{random_state}"
+    naming_suffix = f"pca{pca}.clus{cluster_method}.{lm_type}.{document_repr_type}.{random_state}-masked-{args.mask}"
     print(naming_suffix)
 
     data_dir = os.path.join(INTERMEDIATE_DATA_FOLDER_PATH, dataset_name)
@@ -51,7 +51,7 @@ def main(dataset_name,
         num_classes = len(class_names)
         print(class_names)
 
-    with open(os.path.join(data_dir, f"document_repr_lm-{lm_type}-{document_repr_type}.pk"), "rb") as f:
+    with open(os.path.join(data_dir, f"document_repr_lm-{lm_type}-{document_repr_type}-masked-{args.mask}.pk"), "rb") as f:
         dictionary = pk.load(f)
         document_representations = dictionary["document_representations"]
         class_representations = dictionary["class_representations"]
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     # attention mechanism + T
     parser.add_argument("--document_repr_type", default="mixture-100")
     parser.add_argument("--random_state", type=int, default=42)
-
+    parser.add_argument("--mask", type=int, default=31)
     args = parser.parse_args()
     print(vars(args))
-    main(args.dataset_name, args.pca, args.cluster_method, args.lm_type, args.document_repr_type, args.random_state)
+    main(args,args.dataset_name, args.pca, args.cluster_method, args.lm_type, args.document_repr_type, args.random_state)
