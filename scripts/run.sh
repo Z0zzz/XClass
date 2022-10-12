@@ -2,7 +2,7 @@ set -e
 
 gpu=$1
 dataset=$2
-for m in 30 29 27 23 15
+for m in 31
 do
     CUDA_VISIBLE_DEVICES=${gpu} python static_representations.py --dataset_name ${dataset} --mask ${m}
     CUDA_VISIBLE_DEVICES=${gpu} python class_oriented_document_representations.py --dataset_name ${dataset} --mask ${m}

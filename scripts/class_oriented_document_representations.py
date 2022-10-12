@@ -144,7 +144,7 @@ def main(args):
     print(class_names)
     
     # open .pk file that contains the new class word representation
-    with open(f"./class_representations/class_representation_{args.dataset_name}.pk", "rb") as f:
+    with open(f"./class_representations/class_representation_{args.dataset_name}-original.pk", "rb") as f:
         new_representations = pk.load(f)
     
     finished_class = set()
